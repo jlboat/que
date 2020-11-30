@@ -26,4 +26,4 @@ optional arguments:
 > python que.py -q c1
 ```
 
-![Image of output](https://github.com/jlboat/que/images/Screenshot_2020-11-30_094241.png)
+![Image of output](https://github.com/jlboat/que/blob/main/images/Screenshot_2020-11-30_094241.png)
