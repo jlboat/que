@@ -19,12 +19,12 @@ def parse_arguments():
     parser.add_argument("-u", "--user", type=str, required=False,
             help="view specific user data", action="store")
     parser.add_argument("-q", "--queue", type=str, required=False,
-            help="view specific queue", action="store")
+            help="view queue with substring 'QUEUE'", action="store")
     parser.add_argument("-s", "--state", type=str, required=False,
             help="view jobs in specific state",
             action="store")
     parser.add_argument("-n", "--name", type=str, required=False,
-            help="view jobs with substring 'name'",
+            help="view jobs with substring 'NAME'",
             action="store")
     return parser
 

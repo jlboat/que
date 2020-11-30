@@ -2,8 +2,7 @@
 A python script for checking a PBS Pro Job Scheduler queue
 
 ```bash
-> python que.py -h
-```
+python que.py -h
 
 usage: que.py [-h] [-u USER] [-q QUEUE] [-s STATE] [-n NAME]
 
@@ -17,13 +16,16 @@ optional arguments:
   -h, --help            show this help message and exit
   -u USER, --user USER  view specific user data
   -q QUEUE, --queue QUEUE
-                        view specific queue
+                        view queue with substring 'QUEUE'
   -s STATE, --state STATE
                         view jobs in specific state
-  -n NAME, --name NAME  view jobs with substring 'name'
+  -n NAME, --name NAME  view jobs with substring 'NAME'
+```
+
+Example execution by queue:
 
 ```bash
-> python que.py -q c1
+python que.py -q c1
 ```
 
 ![Image of output](https://github.com/jlboat/que/blob/main/images/Screenshot_2020-11-30_094241.png)
