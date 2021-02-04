@@ -26,6 +26,10 @@ def parse_arguments():
     parser.add_argument("-n", "--name", type=str, required=False,
             help="view jobs with substring 'NAME'",
             action="store")
+    parser.add_argument("-b", "--brief", type=str, required=False,
+            default="f",
+            help="view summary of submitted jobs [t,f]. default: f",
+            action="store")
     return parser
 
 
@@ -34,6 +38,7 @@ def get_qstat_json():
     qstat_output = sp.check_output(['qstat','-f','-Fjson'])
     clean_qstat_output = qstat_output.replace(
             b'"Job_Name":inf,',b'"Job_Name":"Unknown",') #.replace(b'\\', b'\\\\')
+    clean_qstat_output = re.sub(b'"Job_Name":\d+,', b'"Job_Name":"Unknown",', clean_qstat_output)
     try:
         results = json.loads(clean_qstat_output.decode("utf-8","ignore").replace('^"^^',''),
                       object_pairs_hook=OrderedDict)
@@ -63,8 +68,9 @@ def summarize_json(filtered_json):
             job_state_counts[value['job_state'].rstrip()] = job_state_counts[value['job_state']] + 1
         except KeyError:
             job_state_counts['Other'] = job_state_counts['Other'] + 1
-    summary = (f"NumberOfJobs:{number_jobs}  JobsPerQueue:{queue_job_counts}  " + 
-              f"JobStates:{job_state_counts}")
+    summary = {"NumberOfJobs": number_jobs,
+               "JobsPerQueue": list(queue_job_counts.items()),
+               "JobStates": list(job_state_counts.items())}
     return summary
 
 
@@ -205,6 +211,24 @@ def generate_table(json_data, spacing):
     return csv_table
 
 
+def tuples_to_string(job_list):
+    output = ""
+    for item in sorted(list(job_list)):
+        output = output + "\n\t" + item[0] + ": " + str(item[1])
+    return output
+
+
+def pretty_print_summary(json_summary):
+    number_jobs = json_summary["NumberOfJobs"]
+    queue_job_counts = tuples_to_string(json_summary["JobsPerQueue"])
+    job_state_counts = tuples_to_string(json_summary["JobStates"])
+    output = (f"{datetime.now()}\n"
+              f"NumberOfJobs:{number_jobs}\n" + 
+              f"JobsPerQueue:{queue_job_counts}\n" +
+              f"JobStates:{job_state_counts}")
+    print(f"\033[1;31;48m{output}\033[00m")
+
+
 if __name__ == "__main__":
     parser = parse_arguments()
     args = parser.parse_args()
@@ -217,8 +241,8 @@ if __name__ == "__main__":
             fill_none(args.state),
             fill_none(args.name))
     json_summary = summarize_json(json_data)
-    print("\033[1;31;48m{0}  {1}\033[00m".format(datetime.now(), json_summary))
-    data_table = generate_table(json_data, spacing)
-    print(data_table)
-    if len(json_data) > 30:
-        print("\033[1;31;48m{0}  {1}\033[00m".format(datetime.now(), json_summary))
+    if args.brief.lower() == "f":
+        #print("\033[1;31;48m{0}  {1}\033[00m".format(datetime.now(), json_summary))
+        data_table = generate_table(json_data, spacing)
+        print(data_table)
+    pretty_print_summary(json_summary)
