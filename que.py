@@ -39,6 +39,9 @@ def get_qstat_json():
     clean_qstat_output = qstat_output.replace(
             b'"Job_Name":inf,',b'"Job_Name":"Unknown",') #.replace(b'\\', b'\\\\')
     clean_qstat_output = re.sub(b'"Job_Name":\d+,', b'"Job_Name":"Unknown",', clean_qstat_output)
+    for i in [b'expl', b'rho_low', b'rho_high']:
+        clean_qstat_output = re.sub(b'"' + i + b'":[+\-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?\d+)', 
+                b'"' + i + b'":"float"', clean_qstat_output)
     try:
         results = json.loads(clean_qstat_output.decode("utf-8","ignore").replace('^"^^',''),
                       object_pairs_hook=OrderedDict)
@@ -142,7 +145,9 @@ def filter_json(json_data, user, queue, state, name):
             "mem_efficiency":len("MEM Eff.")}
     for jobid, job in json_data["Jobs"].items():
         if type(job["Job_Name"]) == int:
-                job["Job_Name"] = str(job["Job_Name"])
+            job["Job_Name"] = str(job["Job_Name"])
+        elif type(job["Job_Name"]) == float:
+            job["Job_Name"] = "FailedToReadName"
         try:
             if ((user in job["Job_Owner"]) and 
                     (queue in job["queue"]) and 
@@ -167,6 +172,7 @@ def filter_json(json_data, user, queue, state, name):
                         len(convert_mem_efficiency(job,
                             job["Resource_List"])))
         except TypeError:
+            print("TypeError")
             print(job)
             sys.exit(1)
     return filtered_json, spacing
