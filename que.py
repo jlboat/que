@@ -39,6 +39,7 @@ def get_qstat_json():
     clean_qstat_output = qstat_output.replace(
             b'"Job_Name":inf,',b'"Job_Name":"Unknown",') #.replace(b'\\', b'\\\\')
     clean_qstat_output = re.sub(b'"Job_Name":\d+,', b'"Job_Name":"Unknown",', clean_qstat_output)
+    clean_qstat_output = re.sub(b'"PBS_O_PATH":\S+,', b'', clean_qstat_output)
     for i in [b'expl', b'rho_low', b'rho_high']:
         clean_qstat_output = re.sub(b'"' + i + b'":[+\-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?\d+)', 
                 b'"' + i + b'":"float"', clean_qstat_output)
